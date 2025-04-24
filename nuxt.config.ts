@@ -6,4 +6,13 @@ export default defineNuxtConfig({
   },
   devtools: { enabled: true },
   modules: ["@nuxt/eslint", "@nuxt/ui", "nuxt-auth-utils"],
+  runtimeConfig: {
+    oauth: {
+      // provider in lowercase (github, google, etc.)
+      github: {
+        clientId: "",
+        clientSecret: "",
+      },
+    },
+  },
 });
