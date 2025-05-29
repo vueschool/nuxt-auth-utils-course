@@ -4,7 +4,7 @@ const { loggedIn, user, session, fetch, clear, openInPopup } = useUserSession();
 <template>
   <div v-if="loggedIn">
     <UButton @click="clear()">Logout</UButton>
-    {{ user }}
+    {{ user?.login }}
   </div>
   <div v-else>
     <UButton @click="openInPopup('/auth/github')">Login</UButton>
