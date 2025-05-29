@@ -1,0 +1,1 @@
+<template>Hello everyone 👋</template>
