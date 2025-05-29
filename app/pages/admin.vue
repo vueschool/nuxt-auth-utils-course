@@ -2,5 +2,7 @@
 definePageMeta({
   middleware: ["auth"],
 });
+
+const { data } = useFetch("/api/admin");
 </script>
-<template>Logged In Only!</template>
+<template>{{ data.sensitive }}</template>
