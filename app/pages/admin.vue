@@ -3,6 +3,6 @@ definePageMeta({
   middleware: ["auth"],
 });
 
-const { data } = useFetch("/api/admin");
+const { data } = await useFetch("/api/admin");
 </script>
 <template>{{ data.sensitive }}</template>

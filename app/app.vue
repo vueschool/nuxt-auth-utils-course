@@ -2,8 +2,10 @@
 const { loggedIn, user, session, fetch, clear, openInPopup } = useUserSession();
 </script>
 <template>
-  <NavBar />
-  <NuxtPage />
+  <UApp>
+    <NavBar />
+    <NuxtPage />
+  </UApp>
 </template>
 <style>
 @import "tailwindcss";

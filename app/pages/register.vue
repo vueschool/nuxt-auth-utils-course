@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import * as z from "zod";
 import type { FormSubmitEvent } from "@nuxt/ui";
-const { openInPopup, loggedIn, fetch } = useUserSession();
 import { FetchError } from "ofetch";
+const { openInPopup, loggedIn, fetch } = useUserSession();
 
 const schema = z.object({
+  name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email"),
   password: z.string().min(8, "Must be at least 8 characters"),
 });
@@ -19,17 +20,18 @@ const state = reactive<Partial<Schema>>({
 const toast = useToast();
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   try {
-    await $fetch("/auth/login", {
+    await $fetch("/auth/register", {
       method: "POST",
       body: event.data,
     });
     fetch();
+
     toast.add({
-      title: "Success",
-      description: "Logged in.",
+      title: "Thanks for registering!",
       color: "success",
     });
   } catch (e) {
+    console.log(e instanceof FetchError);
     if (e instanceof FetchError) {
       toast.add({
         title: "Error",
@@ -55,7 +57,7 @@ watch(loggedIn, (isLoggedIn) => {
   <UContainer class="flex justify-center items-center mt-10">
     <UCard class="w-96">
       <template #header>
-        <h1 class="text-2xl font-semibold text-center">Login</h1>
+        <h1 class="text-2xl font-semibold text-center">Register</h1>
       </template>
       <UForm
         :schema="schema"
@@ -63,6 +65,9 @@ watch(loggedIn, (isLoggedIn) => {
         class="space-y-4"
         @submit="onSubmit"
       >
+        <UFormField label="Name" name="name">
+          <UInput v-model="state.name" class="w-full" />
+        </UFormField>
         <UFormField label="Email" name="email">
           <UInput v-model="state.email" class="w-full" />
         </UFormField>
