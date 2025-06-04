@@ -1,45 +1,21 @@
-import { eq } from "drizzle-orm";
-
 export default defineEventHandler(async (event) => {
   const { email, password } = await readBody(event);
-
-  const user = await useDb().query.users.findFirst({
-    where: eq(schema.users.email, email),
-  });
-
-  // user with email not found
-  if (!user) {
+  if (!email || !password) {
     throw createError({
-      statusCode: 401,
-      statusMessage: "Invalid email or password. Please try again.",
+      statusCode: 400,
+      statusMessage: "Email and password are required.",
     });
   }
+  const ip = getRequestIP(event, { xForwardedFor: true }) || "unknown";
+  console.log("ip", ip);
 
-  // do other things here like:
-  // check if the user is verified
-  // check if locked (too many attempts)
-  // check if user is banned
+  const authenticatedUser = await checkLoginAttemptsAndAuthenticate(
+    ip,
+    email,
+    password
+  );
 
-  // user didn't register with a password so we can't log them in
-  if (!user.password) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: "Invalid email or password. Please try again.",
-    });
-  }
-
-  const isValid = await verifyPassword(user.password, password);
-
-  // password is incorrect
-  if (!isValid) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: "Invalid email or password. Please try again.",
-    });
-  }
-
-  // user is logged in! 🎉
-  await setUserSession(event, { user });
-
-  return user;
+  // If we reach here, login was successful and not blocked.
+  await setUserSession(event, { user: authenticatedUser });
+  return authenticatedUser;
 });
