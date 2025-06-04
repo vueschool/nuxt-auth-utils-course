@@ -4,6 +4,7 @@ import type { FormSubmitEvent } from "@nuxt/ui";
 const { openInPopup, loggedIn } = useUserSession();
 
 const schema = z.object({
+  name: z.string(),
   email: z.string().email("Invalid email"),
   password: z.string().min(8, "Must be at least 8 characters"),
 });
@@ -11,6 +12,7 @@ const schema = z.object({
 type Schema = z.output<typeof schema>;
 
 const state = reactive<Partial<Schema>>({
+  name: undefined,
   email: undefined,
   password: undefined,
 });
@@ -33,9 +35,12 @@ watch(loggedIn, () => {
 <template>
   <UCard class="max-w-md m-auto my-10">
     <template #header>
-      <h1 class="text-2xl text-center">Login</h1>
+      <h1 class="text-2xl text-center">Register</h1>
     </template>
     <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
+      <UFormField label="Name" name="name">
+        <UInput v-model="state.name" class="w-full" />
+      </UFormField>
       <UFormField label="Email" name="email">
         <UInput v-model="state.email" class="w-full" />
       </UFormField>
@@ -54,7 +59,7 @@ watch(loggedIn, () => {
       @click="openInPopup('/auth/github')"
     >
       <UIcon name="i-simple-icons-github" class="mr-2" />
-      Login with Github
+      Register with Github
     </UButton>
   </UCard>
 </template>
