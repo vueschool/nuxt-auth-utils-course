@@ -4,10 +4,13 @@ import type { FormSubmitEvent } from "@nuxt/ui";
 const { openInPopup, loggedIn, fetch } = useUserSession();
 import { FetchError } from "ofetch";
 
+const { register } = useWebAuthn({
+  registerEndpoint: "/auth/webauthn/register",
+});
+
 const schema = z.object({
   name: z.string(),
   email: z.string().email("Invalid email"),
-  password: z.string().min(8, "Must be at least 8 characters"),
 });
 
 type Schema = z.output<typeof schema>;
@@ -15,15 +18,14 @@ type Schema = z.output<typeof schema>;
 const state = reactive<Partial<Schema>>({
   name: undefined,
   email: undefined,
-  password: undefined,
 });
 
 const toast = useToast();
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   try {
-    await $fetch("/auth/register", {
-      method: "POST",
-      body: event.data,
+    await register({
+      userName: event.data.email,
+      name: event.data.name,
     });
     fetch();
     toast.add({
@@ -56,7 +58,7 @@ watch(loggedIn, () => {
 <template>
   <UCard class="max-w-md m-auto my-10">
     <template #header>
-      <h1 class="text-2xl text-center">Register</h1>
+      <h1 class="text-2xl text-center">Register with Passkey</h1>
     </template>
     <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
       <UFormField label="Name" name="name">
@@ -64,10 +66,6 @@ watch(loggedIn, () => {
       </UFormField>
       <UFormField label="Email" name="email">
         <UInput v-model="state.email" class="w-full" />
-      </UFormField>
-
-      <UFormField label="Password" name="password">
-        <UInput v-model="state.password" type="password" class="w-full" />
       </UFormField>
 
       <UButton type="submit" block> Register </UButton>
@@ -83,9 +81,9 @@ watch(loggedIn, () => {
       Register with Github
     </UButton>
     <UButton as-child variant="outline" block class="mt-5">
-      <NuxtLink to="/register-passkey">
-        <UIcon name="i-heroicons-finger-print" class="mr-2" />
-        Register with Passkey
+      <NuxtLink to="/register">
+        <UIcon name="i-heroicons-envelope" class="mr-2" />
+        Register with Email/Password
       </NuxtLink>
     </UButton>
   </UCard>
