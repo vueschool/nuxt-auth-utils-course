@@ -2,6 +2,9 @@
 import * as z from "zod";
 import type { FormSubmitEvent } from "@nuxt/ui";
 const { openInPopup, loggedIn, fetch } = useUserSession();
+const { authenticate: authWithPasskey } = useWebAuthn({
+  authenticateEndpoint: "/auth/webauthn/login",
+});
 import { FetchError } from "ofetch";
 
 const schema = z.object({
@@ -17,6 +20,33 @@ const state = reactive<Partial<Schema>>({
 });
 
 const toast = useToast();
+
+async function loginWithPasskey() {
+  try {
+    await authWithPasskey(state.email);
+    fetch();
+    toast.add({
+      title: "Logged In Successfully!",
+      description: "Welcome!",
+      color: "success",
+    });
+  } catch (error) {
+    if (error instanceof FetchError) {
+      toast.add({
+        title: "Error Logging In",
+        description: error.data.message,
+        color: "error",
+      });
+    } else {
+      toast.add({
+        title: "Error Logging In",
+        description: "There was an issue logging. Please contact support",
+        color: "error",
+      });
+    }
+  }
+}
+
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   try {
     await $fetch("/auth/login", {
@@ -67,7 +97,7 @@ watch(loggedIn, () => {
         <UInput v-model="state.password" type="password" class="w-full" />
       </UFormField>
 
-      <UButton type="submit" block> Submit </UButton>
+      <UButton type="submit" block> Login </UButton>
     </UForm>
 
     <UButton
@@ -78,6 +108,10 @@ watch(loggedIn, () => {
     >
       <UIcon name="i-simple-icons-github" class="mr-2" />
       Login with Github
+    </UButton>
+    <UButton variant="outline" block class="mt-5" @click="loginWithPasskey()">
+      <UIcon name="i-heroicons-finger-print" class="mr-2" />
+      Login with Passkey
     </UButton>
   </UCard>
 </template>
