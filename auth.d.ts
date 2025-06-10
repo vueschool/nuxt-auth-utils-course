@@ -4,6 +4,7 @@ declare module "#auth-utils" {
     login: string;
     id: string;
     name: string;
+    email: string;
   }
 
   interface UserSession {
